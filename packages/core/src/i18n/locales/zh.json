@@ -1,0 +1,27 @@
+{
+  "app": {
+    "title": "FastTarot"
+  },
+  "picker": {
+    "instruction": "專心想着你的問題，然後選擇卡牌。",
+    "enter": "確認"
+  },
+  "reveal": {
+    "title": "你的牌陣",
+    "back": "重新抽牌"
+  },
+  "orientation": {
+    "upright": "正位",
+    "reversed": "逆位"
+  },
+  "cardLabel": "{{name}}（{{orientation}}）",
+  "toast": {
+    "maxCards": "我們最多支援10張牌的牌陣。"
+  },
+  "language": {
+    "label": "語言",
+    "en": "English",
+    "zh": "繁體中文",
+    "ja": "日本語"
+  }
+}

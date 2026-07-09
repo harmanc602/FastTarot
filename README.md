@@ -1,0 +1,147 @@
+# FastTarot
+
+A **tarot card picker** available as a **responsive web app** and a **cross-platform mobile app** (iOS / Android). Both are built from a shared TypeScript core so card data, translations, and game logic are written once.
+
+Spin an interactive wheel of 78 face-down cards, pick 1–10, and reveal your spread — each card upright or reversed, fully localized in **English, Traditional Chinese, and Japanese**.
+
+---
+
+## Overview
+
+| Layer | Tech |
+|---|---|
+| **Shared core** (`packages/core`) | TypeScript — card data, i18n resources, pure logic (deck, selection, reveal, rotation), design tokens |
+| **Web** (`apps/web`) | React + Vite + TypeScript, Tailwind CSS, Framer Motion, `react-i18next` |
+| **Mobile** (`apps/mobile`) | Expo (SDK 51) + expo-router, React Native Reanimated + Gesture Handler, `react-native-svg`, `expo-localization` + `react-i18next` |
+| **Tooling** | npm workspaces, ESLint + Prettier (shared config), Python (asset prep + data generation) |
+
+The wheel, card back (a code-drawn celestial SVG mandala), selection rules, reveal orientation, and translations are consistent across platforms because they draw from the same `@fasttarot/core` package.
+
+See [`docs/`](docs/) for the [architecture overview](docs/architecture.md), [i18n guide](docs/i18n-guide.md), and [design token reference](docs/design-tokens.md).
+
+---
+
+## Repository layout
+
+```
+FastTarot/
+├─ packages/core/            # Shared, framework-agnostic TypeScript
+│  ├─ data/tarot-cards.json  # The canonical 78-card dataset (en/zh/ja)
+│  ├─ scripts/gen_cards.py   # Regenerates the dataset (source of truth)
+│  ├─ src/logic/             # deck, selection, reveal, rotation (pure functions)
+│  ├─ src/i18n/              # i18next resources + label formatters
+│  └─ src/tokens.ts          # colors, fonts, limits
+├─ apps/web/                 # Vite + React + Tailwind + Framer Motion
+├─ apps/mobile/              # Expo + expo-router + Reanimated
+├─ assets/img/clean/         # 78 cropped card images (shared by both apps)
+└─ docs/
+```
+
+---
+
+## Prerequisites
+
+- **Node.js ≥ 18** and **npm ≥ 9** (npm workspaces)
+- **Python 3.9+** — only needed to regenerate the card dataset
+- **Mobile only:** the [Expo Go](https://expo.dev/go) app on a phone, or an Android/iOS emulator. iOS builds require macOS + Xcode.
+
+---
+
+## Installation
+
+From the repo root:
+
+```bash
+npm install
+```
+
+This installs dependencies for every workspace (`packages/core`, `apps/web`, `apps/mobile`) and links the shared core.
+
+---
+
+## Running locally
+
+### Web
+
+```bash
+npm run web          # starts Vite dev server (http://localhost:5173)
+npm run web:build    # type-check + production build -> apps/web/dist
+```
+
+### Mobile
+
+```bash
+npm run mobile       # starts the Expo dev server
+```
+
+Then press `a` (Android emulator), `i` (iOS simulator, macOS only), or scan the QR code with **Expo Go**. You can also run `npm run mobile -- --web` to preview the RN app in a browser via react-native-web.
+
+---
+
+## Card data & assets
+
+The 78-card dataset (`packages/core/data/tarot-cards.json`) is **generated**, not hand-edited — it is the single source of truth for card identity and localized names.
+
+```bash
+npm run gen:cards                           # regenerate the JSON dataset
+python apps/mobile/scripts/gen_image_map.py # regenerate the mobile require() map
+```
+
+Card artwork lives in `assets/img/clean/` — the 78 cropped images shared by both
+apps (web bundles them via `import.meta.glob`; mobile via a static `require()` map).
+
+---
+
+## Environment variables
+
+None. The app has no backend, accounts, or secrets (see *Out of scope* below). No `.env` file is required.
+
+---
+
+## Quality
+
+```bash
+npm run typecheck    # tsc across all workspaces
+npm run lint         # ESLint
+npm run format       # Prettier --write
+node --test packages/core/test    # run core logic unit tests (after npm install)
+```
+
+---
+
+## Build & deployment
+
+**Web** — a static site. Build produces `apps/web/dist`:
+
+```bash
+npm run web:build            # -> apps/web/dist
+```
+
+The repo ships ready-to-use config for both major static hosts:
+
+- **Vercel** — `vercel.json` at the root (build command, output dir, and asset caching are pre-set). Import the repo and deploy; no dashboard config needed.
+- **Netlify** — `netlify.toml` at the root (same settings). Connect the repo and deploy.
+
+For any other host (GitHub Pages, S3+CloudFront, nginx), just build and serve the
+`apps/web/dist` folder as static files.
+
+**Mobile** — via [EAS Build](https://docs.expo.dev/build/introduction/):
+
+```bash
+cd apps/mobile
+npx eas build --platform android   # or ios
+```
+
+---
+
+## Version control / branching
+
+- `main` — stable, releasable
+- `develop` — integration branch
+- `feature/*` — one branch per feature, merged into `develop` via PR
+
+---
+
+## Out of scope (v1)
+
+User accounts, saved readings, card interpretations/meanings, any backend or database, and push notifications.

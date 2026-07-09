@@ -1,0 +1,16 @@
+# Netlify deployment config for the FastTarot web app.
+# The repo is an npm-workspaces monorepo; build from the root so the shared
+# @fasttarot/core package is linked, then publish the web app's static output.
+
+[build]
+  command = "npm run web:build"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Vite emits content-hashed assets under /assets — safe to cache forever.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
